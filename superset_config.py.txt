@@ -1,19 +1,14 @@
 import os
 
-# Secret key for Superset
-SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY", "changeme")
+SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY_KEY")
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_KEY")
 
-# Database for Superset metadata
-SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:////app/superset.db")
-
-# Optional feature flags
 FEATURE_FLAGS = {
     "EMBEDDED_SUPERSET": True,
 }
 
-# Redis configuration for caching & Celery
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = os.getenv("REDIS_PORT", 6379)
+REDIS_HOST = os.getenv("REDIS_HOST_KEY")
+REDIS_PORT = os.getenv("REDIS_PORT_KEY", 6379)
 
 CACHE_CONFIG = {
     "CACHE_TYPE": "RedisCache",
