@@ -1,18 +1,16 @@
 #!/bin/bash
-# entrypoint.sh for Render + Superset production
-
-set -e  # exit on error
+set -e
 echo "🚀 Starting Superset container..."
 
-# 1️⃣ Initialize Superset DB if not already
+# Upgrade DB
 echo "🔹 Upgrading database..."
 superset db upgrade
 
-# 2️⃣ Initialize Superset (roles, permissions, defaults)
+# Initialize Superset
 echo "🔹 Initializing Superset..."
 superset init
 
-# 3️⃣ Create admin user if it doesn't exist
+# Create admin if not exists
 ADMIN_USERNAME=${SUPERSET_ADMIN_USERNAME:-admin}
 ADMIN_PASSWORD=${SUPERSET_ADMIN_PASSWORD:-admin}
 ADMIN_EMAIL=${SUPERSET_ADMIN_EMAIL:-admin@superset.com}
@@ -29,7 +27,7 @@ else
     echo "🔹 Admin user already exists."
 fi
 
-# 4️⃣ Start Gunicorn (Render sets WEB_CONCURRENCY automatically)
+# Start Gunicorn
 echo "🔹 Launching Superset with Gunicorn..."
 exec gunicorn \
     --bind 0.0.0.0:8088 \
