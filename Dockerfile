@@ -1,25 +1,29 @@
-# Start from the official Superset image
 FROM apache/superset:latest
 
-# Set workdir
 WORKDIR /app
 
-# Install Postgres client
+# Install OS deps
 USER root
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy Superset config
+# Install Python Postgres driver
+USER superset
+RUN pip install --no-cache-dir psycopg2-binary
+
+# Copy Superset config and entrypoint
 COPY --chown=superset:superset superset_config.py /app/pythonpath/superset_config.py
-
-# Copy entrypoint
 COPY --chown=superset:superset entrypoint.sh /app/entrypoint.sh
 RUN chmod 755 /app/entrypoint.sh
 
-# Use entrypoint
+# Entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-# Expose Superset port
+# Expose port
 EXPOSE 8088
 
-# Default CMD (Gunicorn started in entrypoint.sh)
+# Default CMD
 CMD ["superset", "run"]
