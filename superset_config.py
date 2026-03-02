@@ -1,16 +1,10 @@
-# Superset configuration for Render with PostgreSQL
+import os
 
-from superset.config import *  # inherit defaults
+# Use Postgres as the metadata database
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 
-# Public dashboards (optional)
-PUBLIC_ROLE_LIKE_GAMMA = True
-
-# Upload folder
-UPLOAD_FOLDER = "/tmp/uploads"
-
-# Rate limiting
-from flask_limiter.util import get_remote_address
-RATELIMIT_STORAGE_URL = "memory://"
-
-# Disable examples
-LOAD_EXAMPLES = False
+# Superset settings
+SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY", "this-is-a-secret-key")
+ENABLE_PROXY_FIX = True
+WEBSERVER_THREADS = 8
+SUPERSET_WEBSERVER_PORT = int(os.getenv("SUPERSET_PORT", 8088))

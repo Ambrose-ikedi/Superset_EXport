@@ -1,27 +1,33 @@
 #!/bin/bash
 set -e
 
-# Create admin user (skip if exists)
-superset fab create-admin \
-    --username admin \
-    --firstname Admin \
-    --lastname User \
-    --email admin@example.com \
-    --password Admin123 || true
+echo "Waiting for PostgreSQL to be ready..."
+until pg_isready -d "$DATABASE_URL"; do
+  echo "Postgres not ready, sleeping 2s..."
+  sleep 2
+done
 
-# Upgrade database
+echo "PostgreSQL is ready."
+
+echo "Upgrading database..."
 superset db upgrade
 
-# Import dashboards automatically
-if [ -d "/app/superset_export" ]; then
-    echo "Importing dashboards from /app/superset_export..."
-    superset import-dashboards \
-        --path /app/superset_export \
-        --username admin
-fi
+echo "Creating admin user..."
+superset fab create-admin \
+  --username "$SUPERSET_ADMIN_USERNAME" \
+  --password "$SUPERSET_ADMIN_PASSWORD" \
+  --firstname "$SUPERSET_ADMIN_FIRST_NAME" \
+  --lastname "$SUPERSET_ADMIN_LAST_NAME" \
+  --email "$SUPERSET_ADMIN_EMAIL" || true
 
-# Initialize Superset
+echo "Initializing Superset..."
 superset init
 
-# Start gunicorn using Render's $PORT
-exec gunicorn -w 3 -k gevent --timeout 120 -b 0.0.0.0:$PORT "superset.app:create_app()"
+# Optional: import dashboards if folder exists
+if [ -d "/app/superset_export" ]; then
+  echo "Importing dashboards..."
+  superset import-dashboards -p /app/superset_export -u "$SUPERSET_ADMIN_USERNAME" -f || true
+fi
+
+echo "Starting Gunicorn..."
+exec gunicorn -w 4 -b 0.0.0.0:8088 "superset.app:create_app()"
