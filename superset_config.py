@@ -1,15 +1,23 @@
 import os
 
+# ---------------------------
+# Secret Key & Database URI
+# ---------------------------
 SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
 SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
 
+# ---------------------------
+# Feature Flags
+# ---------------------------
 FEATURE_FLAGS = {
     "EMBEDDED_SUPERSET": True,
 }
 
-# Use in-memory cache if Redis not configured
+# ---------------------------
+# Redis Configuration (Optional)
+# ---------------------------
 REDIS_HOST = os.getenv("REDIS_HOST_KEY")
-REDIS_PORT = os.getenv("REDIS_PORT_KEY", 6379)
+REDIS_PORT = int(os.getenv("REDIS_PORT_KEY", 6379))
 
 if REDIS_HOST:
     CACHE_CONFIG = {
@@ -22,10 +30,19 @@ if REDIS_HOST:
     CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
     CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
 else:
-    # fallback to in-memory cache
     CACHE_CONFIG = {
         "CACHE_TYPE": "SimpleCache",
         "CACHE_DEFAULT_TIMEOUT": 300,
     }
     CELERY_BROKER_URL = None
     CELERY_RESULT_BACKEND = None
+
+# ---------------------------
+# Superset Webserver Port (Render auto-sets $PORT)
+# ---------------------------
+SUPERSET_WEBSERVER_PORT = int(os.environ.get("PORT", 8088))
+
+# ---------------------------
+# Web Concurrency (Render default 1)
+# ---------------------------
+WEB_CONCURRENCY = int(os.environ.get("WEB_CONCURRENCY", 1))
