@@ -2,11 +2,12 @@ FROM apache/superset:latest
 
 USER root
 
-RUN /app/.venv/bin/pip install psycopg2-binary redis
+RUN pip install psycopg2-binary redis
 
 COPY superset_config.py /app/pythonpath/superset_config.py
 
 ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py
+ENV PYTHONPATH=/app/pythonpath
 
 USER superset
 
