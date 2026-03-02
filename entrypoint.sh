@@ -1,36 +1,27 @@
 #!/bin/bash
 set -e
 
-# Initialize database if not already
+# Create admin user (skip if exists)
+superset fab create-admin \
+    --username admin \
+    --firstname Admin \
+    --lastname User \
+    --email admin@example.com \
+    --password Admin123 || true
+
+# Upgrade database
 superset db upgrade
 
-# Create admin user if not exists
-export ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-export ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-export ADMIN_FIRST_NAME=${ADMIN_FIRST_NAME:-Admin}
-export ADMIN_LAST_NAME=${ADMIN_LAST_NAME:-User}
-export ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
-
-superset fab create-admin \
-    --username "$ADMIN_USERNAME" \
-    --firstname "$ADMIN_FIRST_NAME" \
-    --lastname "$ADMIN_LAST_NAME" \
-    --email "$ADMIN_EMAIL" \
-    --password "$ADMIN_PASSWORD" || true
-
-# Import dashboards, charts, datasets from the export folder
+# Import dashboards automatically
 if [ -d "/app/superset_export" ]; then
+    echo "Importing dashboards from /app/superset_export..."
     superset import-dashboards \
-        -p /app/superset_export \
-        -u "$ADMIN_USERNAME"
+        --path /app/superset_export \
+        --username admin
 fi
 
 # Initialize Superset
 superset init
 
-# Start Gunicorn on Render port
-exec gunicorn \
-    --bind 0.0.0.0:${PORT:-8088} \
-    --workers 3 \
-    --timeout 120 \
-    "superset.app:create_app()"
+# Start gunicorn using Render's $PORT
+exec gunicorn -w 3 -k gevent --timeout 120 -b 0.0.0.0:$PORT "superset.app:create_app()"

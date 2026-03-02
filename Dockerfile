@@ -1,16 +1,19 @@
-# Use the official Apache Superset image
+# Use the official Apache Superset image as base
 FROM apache/superset:latest
 
-# Set workdir
+# Set working directory
 WORKDIR /app
 
-# Copy Superset config and entrypoint
-# Make entrypoint executable in the COPY command
-COPY --chmod=755 superset_config.py /app/pythonpath/superset_config.py
-COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
+# Copy configuration and entrypoint
+COPY --chown=superset:superset superset_config.py /app/pythonpath/superset_config.py
+COPY --chown=superset:superset entrypoint.sh /app/entrypoint.sh
 
-# Expose the port (Render uses $PORT)
-EXPOSE 8088
+# Make entrypoint executable
+RUN chmod 755 /app/entrypoint.sh
 
-# Use our entrypoint
+# Expose the port Render uses
+ENV PORT=8088
+EXPOSE $PORT
+
+# Set entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
