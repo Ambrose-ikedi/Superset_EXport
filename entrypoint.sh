@@ -1,28 +1,34 @@
 #!/bin/bash
 set -e
 
-# 1️⃣ Upgrade database
+# Initialize database if not already
 superset db upgrade
 
-# 2️⃣ Create admin user if missing
+# Create admin user if not exists
+export ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+export ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+export ADMIN_FIRST_NAME=${ADMIN_FIRST_NAME:-Admin}
+export ADMIN_LAST_NAME=${ADMIN_LAST_NAME:-User}
+export ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+
 superset fab create-admin \
-    --username admin \
-    --firstname Admin \
-    --lastname User \
-    --email admin@example.com \
-    --password Admin123 || true
+    --username "$ADMIN_USERNAME" \
+    --firstname "$ADMIN_FIRST_NAME" \
+    --lastname "$ADMIN_LAST_NAME" \
+    --email "$ADMIN_EMAIL" \
+    --password "$ADMIN_PASSWORD" || true
 
-# 3️⃣ Initialize Superset
-superset init
-
-# 4️⃣ Import dashboards with admin user
+# Import dashboards, charts, datasets from the export folder
 if [ -d "/app/superset_export" ]; then
-    echo "Importing dashboards from /app/superset_export..."
-    superset import-dashboards -p /app/superset_export -u admin || true
+    superset import-dashboards \
+        -p /app/superset_export \
+        -u "$ADMIN_USERNAME"
 fi
 
-# 5️⃣ Start Superset on Render port
-echo "Starting Superset on port ${PORT:-8088}..."
+# Initialize Superset
+superset init
+
+# Start Gunicorn on Render port
 exec gunicorn \
     --bind 0.0.0.0:${PORT:-8088} \
     --workers 3 \
