@@ -4,7 +4,7 @@ FROM apache/superset:latest
 # Switch to root to install dependencies
 USER root
 
-# Upgrade pip and install Python packages in the Superset venv
+# Install Python packages
 RUN /usr/local/bin/python3 -m pip install --upgrade pip \
     && /usr/local/bin/python3 -m pip install \
         psycopg2-binary>=2.9.7 \
@@ -14,14 +14,14 @@ RUN /usr/local/bin/python3 -m pip install --upgrade pip \
         pandas>=2.0.3 \
         numpy>=1.25.0
 
-# Copy Superset config
+# Copy Superset configuration
 COPY superset_config.py /app/pythonpath/superset_config.py
 
 # Copy entrypoint script
-COPY scripts/entrypoint.sh /app/entrypoint.sh
+COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Set environment variables
+# Environment variables
 ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py
 ENV PYTHONPATH=/app/pythonpath
 
