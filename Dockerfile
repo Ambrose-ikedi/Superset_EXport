@@ -18,7 +18,7 @@ RUN /usr/local/bin/python3 -m pip install --upgrade pip \
 COPY superset_config.py /app/pythonpath/superset_config.py
 
 # Copy entrypoint script
-COPY entrypoint.sh /app/entrypoint.sh
+COPY scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Set environment variables
