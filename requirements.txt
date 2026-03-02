@@ -1,4 +1,4 @@
-apache-superset==3.7.0
+apache-superset
 psycopg2-binary
 gunicorn
-gevent>=22.10
+gevent>=21.12.0
