@@ -1,4 +1,20 @@
-apache-superset
-psycopg2-binary
-gunicorn
-gevent>=21.12.0
+# Core Superset
+apache-superset==3.7.0
+
+# PostgreSQL driver
+psycopg2-binary>=2.9.7
+
+# Web server
+gunicorn>=20.1.0
+gevent>=22.10.2
+
+# Redis for caching and Celery
+redis>=5.0.0
+
+# Optional: extra dependencies for full Superset features
+pandas>=2.0.3
+numpy>=1.25.0
+sqlalchemy>=2.1.0
+pyyaml>=6.0
+python-dateutil>=2.8.2
+flask-limiter>=2.9.0
