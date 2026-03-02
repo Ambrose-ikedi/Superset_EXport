@@ -1,38 +1,17 @@
-import logging
+# Minimal superset config to disable login for public dashboards
+# Place this at /app/pythonpath/superset_config.py
 
-# Use "null" auth to allow public access without login
-from superset.security import SupersetSecurityManager
-from flask_appbuilder.security.manager import AUTH_REMOTE_USER
+from flask_appbuilder.security.manager import AUTH_DB
 
 # Disable authentication
-AUTH_TYPE = AUTH_REMOTE_USER
-CUSTOM_SECURITY_MANAGER = SupersetSecurityManager
+AUTH_TYPE = AUTH_DB
+AUTH_USER_REGISTRATION = True
+AUTH_USER_REGISTRATION_ROLE = "Admin"
 
-# Database connection (update your Postgres URL)
-SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://username:password@host:5432/dbname"
+# Optional: allow public dashboards without login
+PUBLIC_ROLE_LIKE_GAMMA = True
 
-# Feature flags
-FEATURE_FLAGS = {
-    "EMBEDDED_SUPERSET": True,
-}
-
-# Cache (optional, use Redis if available)
-REDIS_HOST = None
-REDIS_PORT = 6379
-
-if REDIS_HOST:
-    CACHE_CONFIG = {
-        "CACHE_TYPE": "RedisCache",
-        "CACHE_DEFAULT_TIMEOUT": 300,
-        "CACHE_REDIS_HOST": REDIS_HOST,
-        "CACHE_REDIS_PORT": REDIS_PORT,
-        "CACHE_REDIS_DB": 1,
-    }
-else:
-    CACHE_CONFIG = {
-        "CACHE_TYPE": "SimpleCache",
-        "CACHE_DEFAULT_TIMEOUT": 300,
-    }
-
-# Logging
-LOGGING_LEVEL = logging.INFO
+# Increase concurrency
+SUPERSET_WORKERS = 3
+SUPERSET_WEBSERVER_PORT = 8088
+SUPERSET_WEBSERVER_ADDRESS = "0.0.0.0"

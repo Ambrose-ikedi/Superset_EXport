@@ -1,27 +1,20 @@
 #!/bin/bash
+set -e
 
-echo "Starting Superset..."
-
+# Upgrade database
 superset db upgrade
 
-superset fab create-admin \
- --username admin \
- --firstname Admin \
- --lastname User \
- --email admin@example.com \
- --password admin || true
+# Import dashboards and assets
+superset import-assets -p /app/superset_export
+# If using older format:
+# superset import-dashboards -p /app/superset_export
 
+# Initialize Superset (roles & permissions)
 superset init
 
-echo "Importing dashboards..."
-
-superset import-assets \
-    -p /app/superset_export
-
-echo "Starting Superset Server..."
-
+# Start Superset server
 gunicorn \
- -w 2 \
- -k gevent \
- -b 0.0.0.0:$PORT \
- "superset.app:create_app()"
+    -b 0.0.0.0:8088 \
+    --worker-class gevent \
+    --workers 3 \
+    "superset.app:create_app()"
