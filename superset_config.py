@@ -1,22 +1,16 @@
 import os
 
-# -----------------------------
-# Basic configuration
-# -----------------------------
-SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "this-should-be-changed")
+SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "changeme")
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "SQLALCHEMY_DATABASE_URI",
-    "postgresql+psycopg2://superset:superset@db:5432/superset"
+    "sqlite:////app/superset.db"
 )
 
-# Enable embedded dashboards
 FEATURE_FLAGS = {
     "EMBEDDED_SUPERSET": True,
 }
 
-# -----------------------------
-# Cache and Celery
-# -----------------------------
+# Cache
 REDIS_HOST = os.getenv("REDIS_HOST_KEY")
 REDIS_PORT = int(os.getenv("REDIS_PORT_KEY", 6379))
 
@@ -39,12 +33,14 @@ else:
     CELERY_RESULT_BACKEND = None
 
 # -----------------------------
-# Make dashboards fully public
+# Public dashboards without login
 # -----------------------------
 from superset.security import SupersetSecurityManager
-from flask_appbuilder.security.manager import AUTH_REMOTE_USER
+from flask_appbuilder.security.manager import AUTH_DB
 
-# Treat everyone as a guest automatically
-AUTH_TYPE = AUTH_REMOTE_USER
+# Use normal DB auth but we will create a 'public' user automatically
+AUTH_TYPE = AUTH_DB
 AUTH_USER_REGISTRATION = True
-AUTH_USER_REGISTRATION_ROLE = "Gamma"  # minimal permissions to view dashboards
+AUTH_USER_REGISTRATION_ROLE = "Gamma"
+
+PUBLIC_ROLE_LIKE_GAMMA = True

@@ -1,9 +1,8 @@
-# Use official Superset image
 FROM apache/superset:latest
 
 USER root
 
-# Install Python dependencies
+# Install dependencies
 RUN python3 -m venv /app/.venv || true
 RUN /app/.venv/bin/pip install --upgrade pip
 RUN /app/.venv/bin/pip install \
@@ -11,10 +10,9 @@ RUN /app/.venv/bin/pip install \
     redis \
     gevent>=22.10.2
 
-# Copy custom Superset configuration
+# Copy custom config
 COPY superset_config.py /app/pythonpath/superset_config.py
 
-# Set environment variables
 ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py
 ENV PYTHONPATH=/app/pythonpath
 ENV FLASK_ENV=production
@@ -25,5 +23,13 @@ USER superset
 CMD ["/bin/bash", "-c", "\
     superset db upgrade && \
     superset init && \
+    # Create a public user 'guest' automatically if it doesn't exist \
+    superset fab create-user \
+        --username guest \
+        --firstname Guest \
+        --lastname User \
+        --email guest@example.com \
+        --password guest \
+        --role Gamma || true && \
     gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT 'superset.app:create_app()' \
 "]
