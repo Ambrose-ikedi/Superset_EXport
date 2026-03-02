@@ -1,7 +1,7 @@
 apache-superset==3.7.0
 psycopg2-binary>=2.9.7
 gunicorn>=20.1.0
-gevent>=25.9.1
+gevent>=1.4
 redis>=5.0.0
 pandas>=2.0.3
 numpy>=1.25.0
