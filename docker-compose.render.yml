@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  superset:
+    image: apache/superset:latest
+    container_name: superset
+    ports:
+      - ${PORT:-8088}:8088
+    environment:
+      # Admin user credentials
+      SUPERSET_ADMIN_USERNAME: "admin"
+      SUPERSET_ADMIN_PASSWORD: "Admin123!"
+      SUPERSET_ADMIN_FIRST_NAME: "Admin"
+      SUPERSET_ADMIN_LAST_NAME: "User"
+      SUPERSET_ADMIN_EMAIL: "admin@example.com"
+
+      # PostgreSQL connection (Render provides DATABASE_URL)
+      DATABASE_URL: "${DATABASE_URL}"
+
+      # Optional: Public dashboards
+      PUBLIC_ROLE_LIKE_GAMMA: "True"
+
+    volumes:
+      - ./superset_config.py:/app/pythonpath/superset_config.py
+      - ./superset_export:/app/superset_export
+
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        echo "Starting Superset setup..."
+
+        # Upgrade the database
+        superset db upgrade
+
+        # Create admin user if not exists
+        superset fab create-admin \
+          --username $SUPERSET_ADMIN_USERNAME \
+          --password $SUPERSET_ADMIN_PASSWORD \
+          --firstname $SUPERSET_ADMIN_FIRST_NAME \
+          --lastname $SUPERSET_ADMIN_LAST_NAME \
+          --email $SUPERSET_ADMIN_EMAIL || true
+
+        # Initialize roles and permissions
+        superset init
+
+        # Import dashboards automatically
+        superset import-dashboards -p /app/superset_export -u $SUPERSET_ADMIN_USERNAME -f || true
+
+        # Start Gunicorn server
+        gunicorn -w 4 -b 0.0.0.0:8088 "superset.app:create_app()"
