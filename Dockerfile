@@ -1,29 +1,32 @@
+# Use official Superset image
 FROM apache/superset:latest
 
+# Switch to root to install dependencies
 USER root
 
-# Install system dependencies if needed
-RUN apt-get update && apt-get install -y build-essential libpq-dev
+# Install required Python packages in the Superset venv
+RUN /usr/local/bin/python3 -m pip install --upgrade pip \
+    && /usr/local/bin/python3 -m pip install \
+        psycopg2-binary \
+        redis \
+        gevent>=21.1.2 \
+        flask-limiter>=2.9.0 \
+        pandas>=2.0.3 \
+        numpy>=1.25.0
 
-# Install Python dependencies
-RUN python3 -m venv /app/.venv
-RUN /app/.venv/bin/pip install --upgrade pip
-RUN /app/.venv/bin/pip install \
-    psycopg2-binary \
-    redis \
-    gevent
-
-# Copy Superset config and entrypoint
+# Copy Superset config
 COPY superset_config.py /app/pythonpath/superset_config.py
+
+# Copy entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 # Set environment variables
 ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py
 ENV PYTHONPATH=/app/pythonpath
 
-# Set executable and working user
-RUN chmod +x /app/entrypoint.sh
+# Switch back to superset user
 USER superset
 
-# Entrypoint
+# Use custom entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]

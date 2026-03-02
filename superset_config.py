@@ -1,27 +1,26 @@
 import os
 
-# Secret key for Flask sessions
-SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "supersecretkey")
+# SECRET_KEY can be random for session security
+SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "my-super-secret-key")
 
-# Database connection
+# Postgres database URL (set in Render environment)
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "SQLALCHEMY_DATABASE_URI",
-    "sqlite:///:memory:"  # fallback
+    "postgresql+psycopg2://user:password@host:5432/dbname"
 )
 
-# Feature flags
+# Enable embedded Superset (useful for dashboards)
 FEATURE_FLAGS = {
     "EMBEDDED_SUPERSET": True,
 }
 
-# Allow public dashboards (no login)
-AUTH_TYPE = 0  # 0 = No authentication
-PUBLIC_ROLE_LIKE_GAMMA = True  # guest access to dashboards
-ENABLE_PROXY_FIX = True
+# Public dashboard: skip authentication
+AUTH_TYPE = None
+AUTH_ROLE_PUBLIC = "Gamma"  # minimum read-only role
 
-# Caching
-REDIS_HOST = os.environ.get("REDIS_HOST_KEY")
-REDIS_PORT = int(os.environ.get("REDIS_PORT_KEY", 6379))
+# Cache & broker settings
+REDIS_HOST = os.getenv("REDIS_HOST_KEY")
+REDIS_PORT = int(os.getenv("REDIS_PORT_KEY", 6379))
 
 if REDIS_HOST:
     CACHE_CONFIG = {
