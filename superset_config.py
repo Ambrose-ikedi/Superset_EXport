@@ -1,10 +1,14 @@
 import os
 
-# Use Postgres as the metadata database
-SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+# Use environment variables for DB
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    "SUPERSET_DATABASE_URI",
+    "postgresql+psycopg2://user:password@localhost:5432/superset"
+)
 
-# Superset settings
-SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY", "this-is-a-secret-key")
-ENABLE_PROXY_FIX = True
-WEBSERVER_THREADS = 8
-SUPERSET_WEBSERVER_PORT = int(os.getenv("SUPERSET_PORT", 8088))
+SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "change-me")
+
+# Optional: Disable SQLite caching warnings
+CACHE_CONFIG = {
+    "CACHE_TYPE": "SimpleCache",
+}

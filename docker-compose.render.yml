@@ -1,21 +1,14 @@
-version: "3.8"
-
 services:
   superset:
     image: apache/superset:latest
-    container_name: superset
-    build:
-      context: .
-      dockerfile: Dockerfile
-    entrypoint: /app/entrypoint.sh
-    environment:
-      SUPERSET_ADMIN_USERNAME: admin
-      SUPERSET_ADMIN_PASSWORD: admin123
-      SUPERSET_ADMIN_FIRST_NAME: Admin
-      SUPERSET_ADMIN_LAST_NAME: User
-      SUPERSET_ADMIN_EMAIL: admin@example.com
-      DATABASE_URL: ${DATABASE_URL}  # Render Postgres URL from env
-      SUPERSET_PORT: 8088
+    env:
+      # Use your Render Postgres environment variables
+      SUPERSET_DATABASE_URI: "postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+      SUPERSET_SECRET_KEY: "replace-with-a-secure-random-string"
+      FLASK_ENV: "production"
+      # Gunicorn settings
+      WEB_CONCURRENCY: 2
+      SUPERSET_WEBSERVER_TIMEOUT: 120
     ports:
-      - "8088:8088"
-    restart: unless-stopped
+      - 8088
+    entrypoint: ["/app/entrypoint.sh"]
