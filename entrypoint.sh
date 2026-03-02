@@ -1,11 +1,27 @@
 #!/bin/bash
-set -e
 
-# Run migrations
+echo "Starting Superset..."
+
 superset db upgrade
 
-# Initialize Superset
+superset fab create-admin \
+ --username admin \
+ --firstname Admin \
+ --lastname User \
+ --email admin@example.com \
+ --password admin || true
+
 superset init
 
-# Start Gunicorn with gevent worker
-exec gunicorn -w 2 -k gevent -b 0.0.0.0:${PORT:-8088} "superset.app:create_app()"
+echo "Importing dashboards..."
+
+superset import-assets \
+    -p /app/superset_export
+
+echo "Starting Superset Server..."
+
+gunicorn \
+ -w 2 \
+ -k gevent \
+ -b 0.0.0.0:$PORT \
+ "superset.app:create_app()"
