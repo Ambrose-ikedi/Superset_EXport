@@ -4,11 +4,11 @@ FROM apache/superset:latest
 # Switch to root to install dependencies
 USER root
 
-# Install required Python packages in the Superset venv
+# Upgrade pip and install Python packages in the Superset venv
 RUN /usr/local/bin/python3 -m pip install --upgrade pip \
     && /usr/local/bin/python3 -m pip install \
-        psycopg2-binary \
-        redis \
+        psycopg2-binary>=2.9.7 \
+        redis>=5.0.0 \
         gevent>=21.1.2 \
         flask-limiter>=2.9.0 \
         pandas>=2.0.3 \
