@@ -1,18 +1,27 @@
 import os
 
-SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "changeme")
+# Secret key for Flask sessions
+SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "supersecretkey")
+
+# Database connection
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "SQLALCHEMY_DATABASE_URI",
-    "sqlite:////app/superset.db"
+    "sqlite:///:memory:"  # fallback
 )
 
+# Feature flags
 FEATURE_FLAGS = {
-    "EMBEDDED_SUPERSET": True,  # allows standalone dashboards
+    "EMBEDDED_SUPERSET": True,
 }
 
-# Cache setup
-REDIS_HOST = os.getenv("REDIS_HOST_KEY")
-REDIS_PORT = int(os.getenv("REDIS_PORT_KEY", 6379))
+# Allow public dashboards (no login)
+AUTH_TYPE = 0  # 0 = No authentication
+PUBLIC_ROLE_LIKE_GAMMA = True  # guest access to dashboards
+ENABLE_PROXY_FIX = True
+
+# Caching
+REDIS_HOST = os.environ.get("REDIS_HOST_KEY")
+REDIS_PORT = int(os.environ.get("REDIS_PORT_KEY", 6379))
 
 if REDIS_HOST:
     CACHE_CONFIG = {
@@ -31,16 +40,3 @@ else:
     }
     CELERY_BROKER_URL = None
     CELERY_RESULT_BACKEND = None
-
-# -----------------------------
-# Make dashboards public
-# -----------------------------
-from superset.security import SupersetSecurityManager
-from flask_appbuilder.security.manager import AUTH_DB
-
-AUTH_TYPE = AUTH_DB
-AUTH_USER_REGISTRATION = True
-AUTH_USER_REGISTRATION_ROLE = "Gamma"
-
-# Optional: automatically assign guest role
-PUBLIC_ROLE_LIKE_GAMMA = True
