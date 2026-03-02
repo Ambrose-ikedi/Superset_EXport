@@ -1,4 +1,24 @@
-apache-superset
-psycopg2-binary
-gunicorn
-gevent
+# Superset
+apache-superset==3.7.0
+
+# Database driver
+psycopg2-binary>=2.9.9
+
+# Web server
+gunicorn>=20.1.0
+gevent>=22.10.2
+
+# Caching / Redis
+redis>=5.3.0
+Flask-Caching>=2.0.2
+cachelib>=0.9.0
+
+# Async / Celery
+celery>=5.3.0
+
+# Flask / Web dependencies
+Flask>=2.4.0
+Flask-Limiter>=2.0.5
+
+# Extras (common utils for Superset)
+python-dotenv>=1.0.0
