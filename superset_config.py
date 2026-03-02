@@ -1,21 +1,13 @@
 import os
 
-# ---------------------------
-# Secret Key & Database URI
-# ---------------------------
-SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
-SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
+SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY", "supersecretkey")
+SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 
-# ---------------------------
-# Feature Flags
-# ---------------------------
 FEATURE_FLAGS = {
-    "EMBEDDED_SUPERSET": True,
+    "EMBEDDED_SUPERSET": True,  # enable embedding dashboards
 }
 
-# ---------------------------
-# Redis Configuration (Optional)
-# ---------------------------
+# Use Redis if configured
 REDIS_HOST = os.getenv("REDIS_HOST_KEY")
 REDIS_PORT = int(os.getenv("REDIS_PORT_KEY", 6379))
 
@@ -37,12 +29,7 @@ else:
     CELERY_BROKER_URL = None
     CELERY_RESULT_BACKEND = None
 
-# ---------------------------
-# Superset Webserver Port (Render auto-sets $PORT)
-# ---------------------------
-SUPERSET_WEBSERVER_PORT = int(os.environ.get("PORT", 8088))
-
-# ---------------------------
-# Web Concurrency (Render default 1)
-# ---------------------------
-WEB_CONCURRENCY = int(os.environ.get("WEB_CONCURRENCY", 1))
+# Public guest user for dashboards
+PUBLIC_USER_USERNAME = os.getenv("PUBLIC_USER_USERNAME", "public_user")
+PUBLIC_USER_EMAIL = os.getenv("PUBLIC_USER_EMAIL", "public@example.com")
+PUBLIC_USER_ROLE = "Public"
