@@ -1,20 +1,29 @@
 #!/bin/bash
 set -e
 
-# Upgrade database
+# 1️⃣ Upgrade database
 superset db upgrade
 
-# Import dashboards and assets
-superset import-assets -p /app/superset_export
-# If using older format:
-# superset import-dashboards -p /app/superset_export
+# 2️⃣ Create admin user (if it doesn't exist)
+superset fab create-admin \
+    --username admin \
+    --firstname Admin \
+    --lastname User \
+    --email admin@example.com \
+    --password Admin123
 
-# Initialize Superset (roles & permissions)
+# 3️⃣ Initialize Superset
 superset init
 
-# Start Superset server
-gunicorn \
-    -b 0.0.0.0:8088 \
-    --worker-class gevent \
+# 4️⃣ Import dashboards, charts, datasets from your export folder
+if [ -d "/app/superset_export" ]; then
+    echo "Importing dashboards from /app/superset_export..."
+    superset import-dashboards -p /app/superset_export || true
+fi
+
+# 5️⃣ Start Superset in production mode
+exec gunicorn \
+    --bind 0.0.0.0:8088 \
     --workers 3 \
+    --timeout 120 \
     "superset.app:create_app()"
