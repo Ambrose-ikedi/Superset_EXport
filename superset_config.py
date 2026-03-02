@@ -7,10 +7,10 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
 )
 
 FEATURE_FLAGS = {
-    "EMBEDDED_SUPERSET": True,
+    "EMBEDDED_SUPERSET": True,  # allows standalone dashboards
 }
 
-# Cache
+# Cache setup
 REDIS_HOST = os.getenv("REDIS_HOST_KEY")
 REDIS_PORT = int(os.getenv("REDIS_PORT_KEY", 6379))
 
@@ -33,14 +33,14 @@ else:
     CELERY_RESULT_BACKEND = None
 
 # -----------------------------
-# Public dashboards without login
+# Make dashboards public
 # -----------------------------
 from superset.security import SupersetSecurityManager
 from flask_appbuilder.security.manager import AUTH_DB
 
-# Use normal DB auth but we will create a 'public' user automatically
 AUTH_TYPE = AUTH_DB
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Gamma"
 
+# Optional: automatically assign guest role
 PUBLIC_ROLE_LIKE_GAMMA = True

@@ -10,7 +10,7 @@ RUN /app/.venv/bin/pip install \
     redis \
     gevent>=22.10.2
 
-# Copy custom config
+# Copy config
 COPY superset_config.py /app/pythonpath/superset_config.py
 
 ENV SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py
@@ -19,11 +19,10 @@ ENV FLASK_ENV=production
 
 USER superset
 
-# Start Superset
+# Initialize DB and create guest user
 CMD ["/bin/bash", "-c", "\
     superset db upgrade && \
     superset init && \
-    # Create a public user 'guest' automatically if it doesn't exist \
     superset fab create-user \
         --username guest \
         --firstname Guest \
