@@ -1,28 +1,19 @@
 #!/bin/bash
+set -e
 
-echo "Starting Superset..."
-
+# Initialize database
 superset db upgrade
 
-superset fab create-admin \
---username admin \
---firstname Superset \
---lastname Admin \
---email admin@superset.com \
---password admin || true
+# Optional: create admin user if it doesn't exist
+# superset fab create-admin \
+#   --username admin \
+#   --password admin \
+#   --firstname Admin \
+#   --lastname User \
+#   --email admin@example.com
 
+# Load default roles & permissions
 superset init
 
-echo "Importing dashboards..."
-
-superset import-assets \
---path /app/superset_export \
---username admin || true
-
-echo "Starting server..."
-
-gunicorn \
---bind 0.0.0.0:8088 \
---workers 1 \
---timeout 120 \
-"superset.app:create_app()"
+# Start Superset web server on all interfaces
+exec superset run -h 0.0.0.0 -p 8088 --with-threads --reload --debugger
