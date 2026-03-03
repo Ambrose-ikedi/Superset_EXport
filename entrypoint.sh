@@ -1,36 +1,28 @@
 #!/bin/bash
-set -e
-echo "🚀 Starting Superset container..."
 
-# Upgrade DB
-echo "🔹 Upgrading database..."
+echo "Starting Superset..."
+
 superset db upgrade
 
-# Initialize Superset
-echo "🔹 Initializing Superset..."
+superset fab create-admin \
+--username admin \
+--firstname Superset \
+--lastname Admin \
+--email admin@superset.com \
+--password admin || true
+
 superset init
 
-# Create admin if not exists
-ADMIN_USERNAME=${SUPERSET_ADMIN_USERNAME:-admin}
-ADMIN_PASSWORD=${SUPERSET_ADMIN_PASSWORD:-admin}
-ADMIN_EMAIL=${SUPERSET_ADMIN_EMAIL:-admin@superset.com}
+echo "Importing dashboards..."
 
-if ! superset fab list-users | grep -q "$ADMIN_USERNAME"; then
-    echo "🔹 Creating admin user: $ADMIN_USERNAME"
-    superset fab create-admin \
-      --username "$ADMIN_USERNAME" \
-      --password "$ADMIN_PASSWORD" \
-      --firstname Superset \
-      --lastname Admin \
-      --email "$ADMIN_EMAIL"
-else
-    echo "🔹 Admin user already exists."
-fi
+superset import-assets \
+--path /app/superset_export \
+--username admin || true
 
-# Start Gunicorn
-echo "🔹 Launching Superset with Gunicorn..."
-exec gunicorn \
-    --bind 0.0.0.0:8088 \
-    --workers ${WEB_CONCURRENCY:-1} \
-    --worker-class gthread \
-    "superset.app:create_app()"
+echo "Starting server..."
+
+gunicorn \
+--bind 0.0.0.0:8088 \
+--workers 1 \
+--timeout 120 \
+"superset.app:create_app()"
